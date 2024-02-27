@@ -1,0 +1,7 @@
+# Ignore the API key file
+.env
+
+# Ignore node modules and automatically generated files
+node_modules/
+*.log
+*.zip

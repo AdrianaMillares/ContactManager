@@ -1,0 +1,186 @@
+<%- include('./includes/head.ejs', { pageTitle: 'Home' }) %>
+
+    <body class="bg-light">
+        <h1 class="m-4">Gestiona tus contactos</h1>
+        <div class="p-4 m-4">
+            <div class="container mx-0 clien_table w-100">
+                <div class="row justify-content-between">
+                    <div class="col p-0">
+                        <h4>Clientes</h4>
+                    </div>
+                    <div class="col">
+                        <div class="input-group mb-3">
+                            <form action="/search" method="POST">
+                                <div class="row mb-3">
+                                    <div class="col">
+                                        <label for="exampleInputEmail1" class="form-label"><strong>Correo electrónico</strong></label>
+                                    </div>
+                                    <div class="col">
+                                        <input type="email" class="form-control" id="Email1" name="email" aria-describedby="emailHelp">
+                                    </div>
+                                    <div class="col">
+                                        <button type="submit" class="input-group-text" id="basic-addon1" data-bs-toggle="modal" data-bs-target="#searchModal">Buscar</button>
+                                    </div>
+                                </div>
+                                <!-- Modal -->
+                                <div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="searchModalLabel">Resultados de la búsqueda</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body" id="searchResults">
+                                                <!-- Aquí se mostrarán los resultados de la búsqueda -->
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                    <div class="col col-auto">
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#addClient">
+                            Añadir cliente
+                        </button>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="addClient" tabindex="-1" aria-labelledby="addClientLabel"
+                            aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="addClientLabel">Añadir cliente</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <form id="addClientForm" method="POST" action="/">
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label for="exampleInputName" class="form-label">Nombre</label>
+                                                <input type="text" class="form-control" id="Name" name="name"
+                                                    aria-describedby="nameHelp">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="exampleInputLastName" class="form-label">Apellido</label>
+                                                <input type="text" class="form-control" id="LastName" name="lastName"
+                                                    aria-describedby="lastNameHelp">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="exampleInputEmail1" class="form-label">Correo
+                                                    electrónico</label>
+                                                <input type="email" class="form-control" id="Email1" name="email"
+                                                    aria-describedby="emailHelp">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="exampleInputPhone" class="form-label">Número de
+                                                    teléfono</label>
+                                                <input type="tel" class="form-control" id="Phone" name="phone"
+                                                    aria-describedby="phoneHelp">
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="submit" id="submit" class="btn btn-primary">Enviar</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <table class="table clien_table">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Apellido</th>
+                        <th>Correo electrónico</th>
+                    </tr>
+                </thead>
+                <tbody id="contact-body">
+                    <% if (results && Array.isArray(results)) { %>
+                        <% results.forEach(result=> { %>
+                            <tr>
+                                <td><%- result.properties.firstname && result.properties.firstname.value ?
+                                        result.properties.firstname.value : 'No hay nombre disponible' %></td>
+                                <td><%- result.properties.lastname && result.properties.lastname.value ?
+                                        result.properties.lastname.value : 'No hay apellido disponible' %></td>
+                                <td>
+                                    <% if (result['identity-profiles'] && result['identity-profiles'].length> 0 &&
+                                        result['identity-profiles'][0].identities &&
+                                        result['identity-profiles'][0].identities.length > 0 &&
+                                        result['identity-profiles'][0].identities[0].value) { %>
+                                        <%- result['identity-profiles'][0].identities[0].value %>
+                                            <% } else { %>
+                                                No hay correo electrónico disponible
+                                                <% } %>
+                                </td>
+                            </tr>
+                            <% }); %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="3">No hay resultados disponibles.</td>
+                                    </tr>
+                                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </body>
+    <script>
+        document.getElementById('submit').addEventListener('click', async function () {
+            try {
+                const response = await fetch('/');
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    throw new Error('Error al obtener los datos del servidor');
+                }
+            } catch (error) {
+                console.error('Error al sincronizar la tabla:', error.message);
+                alert('Error al sincronizar la tabla: ' + error.message);
+            }
+        });
+    </script>
+    <script>
+        document.getElementById('basic-addon1').addEventListener('click', async function () {
+            const email = document.getElementById('Email1').value;
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email })
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        const { name, lastName, email } = data.data;
+                        const resultHTML = `
+                            <div class="result-item">
+                                <p><strong>Nombre:</strong> ${name}</p>
+                                <p><strong>Apellido:</strong> ${lastName}</p>
+                                <p><strong>Correo electrónico:</strong> ${email}</p>
+                            </div>
+                        `;
+                        document.getElementById('searchResults').innerHTML = resultHTML;
+                    } else {
+                        alert(data.message);
+                    }
+                } else {
+                    throw new Error('Error al obtener los datos del servidor');
+                }
+            } catch (error) {
+                console.error('Error al sincronizar la tabla:', error.message);
+                alert('Error al sincronizar la tabla: ' + error.message);
+            }
+        });
+    </script>
+    <%- include('./includes/footer') %>

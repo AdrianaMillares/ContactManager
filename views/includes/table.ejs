@@ -1,0 +1,39 @@
+<table class="table clien_table">
+    <thead>
+        <tr>
+            <th >Nombre</th>
+            <th >Apellido</th>
+            <th >Correo electrónico</th>
+        </tr>
+    </thead>
+    <tbody id="contact-body">
+       <%- 
+       require('dotenv').config();
+
+        const apiKey = process.env.HUBSPOT_API_KEY;
+
+        const hubspot = require('@hubspot/api-client')
+        const hubspotClient = new hubspot.Client({ developerApiKey: apiKey })
+        hubspotClient.crm.contacts.basicApi
+    .getPage(limit, after, properties, propertiesWithHistory, associations, archived)
+    .then((results) => {
+        console.log("holaaaaaa");
+        console.log(results)
+        const tbody = document.getElementById('contact-body');
+
+        // Iteramos sobre cada contacto y agregamos una fila a la tabla
+        results.forEach(result => {
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+            <td>${results.properties.firstname.value}</td>
+            <td>${results.properties.lastname.value}</td>
+            <td>${results.properties.email.value}</td>
+        `;
+            tbody.appendChild(fila);
+    })
+    .catch((err) => {
+        console.error(err)
+    })})
+        %>
+    </tbody>
+</table>
